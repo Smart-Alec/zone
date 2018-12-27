@@ -1,0 +1,105 @@
+class Road{
+    constructor(params = {}){
+        this.name = params.name || '';
+        this.suffix = params.suffix || '';
+        this.lanes = params.lanes || 2;
+    }
+    //Name
+    get name(){
+        return this._name;
+    }
+    set name(value){
+        if(typeof value != 'string'){console.error('Name must be of type String');}
+        if(value != ''){
+            this._name = value.toLowerCase();
+        }else{
+            this._name = this.random_name();
+        }
+    }
+    get suffix(){
+        return this._suffix;
+    }
+    set suffix(value){
+        if(typeof value != 'string'){console.error('Suffix must be of type String');}
+        if(value != ''){
+            this._suffix = value.toLowerCase();
+        }else{
+            this._suffix = this.random_suffix();
+        }
+    }
+    random_name(language = 'en'){
+        if(language == 'en'){
+            var names = ['oak', 'pine', 'cedar', 'maple', 'ash', 'ginko'];
+            return names[Math.floor(Math.random()*names.length)];
+        }
+    }
+    random_suffix(language = 'en'){
+        if(language == 'en'){
+            var names = ['street', 'road', 'boulevard', 'parkway', 'circle', 'ave'];
+            return names[Math.floor(Math.random()*names.length)];
+        }
+    }
+    get full_name(){
+        return this.name.charAt(0).toUpperCase() + this.name.slice(1) + ' ' + this.suffix.charAt(0).toUpperCase() + this.suffix.slice(1);
+    }
+    //Type
+    set lanes(value = 2){
+        if(typeof value != 'number'){console.error('Type must be of type String');}
+        this._lanes = 2;
+    }
+    get lanes(){
+        return this._lanes;
+    }
+    //Path
+    set path(value){
+        this._path = value;
+    }
+    
+    get path(){
+        return this._path;
+    }
+}
+//Temporary Constants
+var temp = {edit_mode: null, road: null, display: null};
+var roads = [];
+function render(){
+    roads.forEach(function(road){
+        new Path({segments: road.path.segments, strokeWidth: road.lanes, strokeColor: 'black'});
+    });
+}
+//Input Commands
+function onKeyDown(e){
+            switch(e.key){
+                case 'r':
+                    console.log('r');
+                    temp.road = new Road();
+                    temp.edit_mode = 'road';
+                    temp.road.path = new Path({strokeWidth: (temp.road.lanes*2), strokeColor: 'green'});
+                    temp.display = new Path({strokeColor: 'green', strokeWidth: (temp.road.lanes*2)});
+                    break;
+    }
+}
+function onMouseDown(e){
+    switch(temp.edit_mode){
+        case 'road':
+            if(e.delta.length < 5){
+                console.log('dbl');
+                roads.push(temp.road);
+                temp.road.path.remove();
+                temp.road = null;
+                temp.edit_mode = null;
+                render();
+            }else{
+                temp.road.path.add(e.point);
+            }
+            break;
+    }
+}
+function onMouseMove(e){
+    if(temp.edit_mode == 'road'){
+     if(temp.road != null){
+         temp.display.segments = temp.road.path.segments;
+         temp.display.add(e.point);
+     }
+    }
+}
